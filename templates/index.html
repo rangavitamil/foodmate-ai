@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FoodMate AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #fff7ed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 420px;
+            height: 650px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #ff7043;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 25px;
+        }
+
+        .header p {
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #fffaf5;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            border-radius: 15px;
+            max-width: 80%;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .user {
+            background: #ff7043;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot {
+            background: #eeeeee;
+            color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 12px;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        button {
+            margin-left: 8px;
+            border: none;
+            background: #ff7043;
+            color: white;
+            padding: 0 18px;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #e85d32;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="chat-container">
+
+    <div class="header">
+        <h1>🍴 FoodMate AI</h1>
+        <p>Your Smart Food & Restaurant Assistant</p>
+    </div>
+
+    <div class="chat-box" id="chatBox">
+        <div class="message bot">
+            👋 Hi! I'm FoodMate AI.<br>
+            Ask me anything about food, recipes, restaurants or cooking!
+        </div>
+    </div>
+
+    <div class="input-area">
+        <input
+            type="text"
+            id="messageInput"
+            placeholder="Ask about food..."
+            onkeydown="handleEnter(event)"
+        >
+
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+</div>
+
+<script>
+    async function sendMessage() {
+
+        const input = document.getElementById("messageInput");
+        const chatBox = document.getElementById("chatBox");
+
+        const message = input.value.trim();
+
+        if (!message) return;
+
+        const userMessage = document.createElement("div");
+        userMessage.className = "message user";
+        userMessage.textContent = message;
+
+        chatBox.appendChild(userMessage);
+
+        input.value = "";
+
+        const loadingMessage = document.createElement("div");
+        loadingMessage.className = "message bot";
+        loadingMessage.textContent = "FoodMate AI is thinking...";
+
+        chatBox.appendChild(loadingMessage);
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: message
+                })
+            });
+
+            const data = await response.json();
+
+            loadingMessage.textContent = data.reply;
+
+        } catch (error) {
+
+            loadingMessage.textContent =
+                "Sorry, I couldn't connect to the server.";
+
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function handleEnter(event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    }
+</script>
+
+</body>
+</html>
